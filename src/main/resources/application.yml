@@ -1,0 +1,45 @@
+camunda.bpm:
+  admin-user:
+    id: postgres
+    password: 1
+    firstName: postgres
+  filter:
+    create: All tasks
+
+spring:
+  datasource:
+	  platform: postgres
+  	  driverClassName: org.postgresql.Driver
+      url: jdbc:postgressql://localhost:5432/sed
+      username: postgres
+      password: 1
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
+    properties.javax.persistence.validation.mode: none
+    generate-ddl: false
+    show-sql: false
+    hibernate.ddl-auto: update
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: geoportalFS
+project:
+  path: /home/arch-admin/sedbpmn
+  eqyzmet:
+    url: http://eatyrau.kz
+    secret: 3MAzxrhMVdPThyL68bTSsSWuBh8gHQ28
+  dejurka:
+#    url: http://geo1.kazgisa.kz:99
+    url: http://dm.eatyrau.kz
+    secret: 68bTSsSWu3MAzxrhMVdPThyLHQ28
+
+
+#logging:
+ # level:
+  #  org:
+   #   thymeleaf: TRACE
+    #  springframework: TRACE

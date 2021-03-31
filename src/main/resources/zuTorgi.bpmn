@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1gnuq3g" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.4.0">
+  <bpmn:process id="zuTorgi" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_0x8hq4l">
+      <bpmn:outgoing>SequenceFlow_1wz09o4</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask_0e8a9l9" name="1. Формирование  предв.акта выбора" camunda:candidateGroups="ZUTORGI_ACT_FORM">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="message" type="string" />
+        </camunda:formData>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="type">TASK</camunda:inputParameter>
+        </camunda:inputOutput>
+        <camunda:taskListener delegateExpression="${startEventService}" event="create" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1wz09o4</bpmn:incoming>
+      <bpmn:incoming>Flow_1w5bsxo</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_12rw75j</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask_1mt9641" name="2. Подписание акта выбора" camunda:candidateGroups="ZUTORGI_ACT_SIGN">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="type">SIGN</camunda:inputParameter>
+        </camunda:inputOutput>
+        <camunda:formData>
+          <camunda:formField id="agreed" type="boolean" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_12rw75j</bpmn:incoming>
+      <bpmn:outgoing>Flow_1yn6m83</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask_09cyfwm" name="5. Подготовка данных для ПКК" camunda:candidateGroups="ZUTORGI_PREPARE_PKK">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="type">TASK</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_15egapd</bpmn:incoming>
+      <bpmn:outgoing>Flow_13mxfxj</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_1w6shxz">
+      <bpmn:incoming>SequenceFlow_0p0673d</bpmn:incoming>
+      <bpmn:incoming>Flow_13mxfxj</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_12rw75j" sourceRef="UserTask_0e8a9l9" targetRef="UserTask_1mt9641" />
+    <bpmn:sequenceFlow id="SequenceFlow_15egapd" sourceRef="ExclusiveGateway_0bbs66q" targetRef="UserTask_09cyfwm">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{approved}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0a4s61d" sourceRef="Gateway_05u180a" targetRef="SubProcess_1eesq2q">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{agreed}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1aafer5" sourceRef="SubProcess_1eesq2q" targetRef="SubProcess_1w82ypc" />
+    <bpmn:sequenceFlow id="SequenceFlow_1wz09o4" sourceRef="StartEvent_0x8hq4l" targetRef="UserTask_0e8a9l9" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0bbs66q">
+      <bpmn:incoming>Flow_1mbfljp</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_15egapd</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_0p0673d</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_0p0673d" sourceRef="ExclusiveGateway_0bbs66q" targetRef="EndEvent_1w6shxz">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{not approved}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="SubProcess_1eesq2q" name="3. Передача в ЕГКН" camunda:candidateGroups="ZUTORGI_SEND_EGKN">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="type">TASK</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0a4s61d</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1aafer5</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="SubProcess_1w82ypc" name="4. ОЗО. разработка постановления, подпсиание" camunda:candidateGroups="ZUTORGI_OZO_POST">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="orderText" type="string" />
+          <camunda:formField id="approved" type="boolean" />
+          <camunda:formField id="act" type="string" />
+          <camunda:formField id="egkn" type="boolean" />
+        </camunda:formData>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="type">TASK</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1aafer5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1mbfljp</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_05u180a">
+      <bpmn:incoming>Flow_1yn6m83</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0a4s61d</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1w5bsxo</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1yn6m83" sourceRef="UserTask_1mt9641" targetRef="Gateway_05u180a" />
+    <bpmn:sequenceFlow id="Flow_1w5bsxo" sourceRef="Gateway_05u180a" targetRef="UserTask_0e8a9l9">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{not agreed}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1mbfljp" sourceRef="SubProcess_1w82ypc" targetRef="ExclusiveGateway_0bbs66q" />
+    <bpmn:sequenceFlow id="Flow_13mxfxj" sourceRef="UserTask_09cyfwm" targetRef="EndEvent_1w6shxz" />
+    <bpmn:textAnnotation id="TextAnnotation_0lh308t">
+      <bpmn:text>передано в коммунальные службы/forwarded to communal
+Загрузка влолжений</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:textAnnotation id="TextAnnotation_0pt49ws">
+      <bpmn:text>Сформирован/на подписи предварительный акт выбора/ Act of reconcilation created</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:textAnnotation id="TextAnnotation_1d4y86c">
+      <bpmn:text>подписан предварительный акт выбора/ Act of reconcilation signed</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:textAnnotation id="TextAnnotation_069hybi">
+      <bpmn:text>Формирование окончательного 
+положительного Акта и постановления</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1ocug06" sourceRef="UserTask_0e8a9l9" targetRef="TextAnnotation_0pt49ws" />
+    <bpmn:association id="Association_0naams8" sourceRef="UserTask_1mt9641" targetRef="TextAnnotation_1d4y86c" />
+    <bpmn:association id="Association_0j2vlaa" sourceRef="SubProcess_1eesq2q" targetRef="TextAnnotation_0lh308t" />
+    <bpmn:association id="Association_1albkn9" sourceRef="SubProcess_1w82ypc" targetRef="TextAnnotation_069hybi" />
+    <bpmn:textAnnotation id="TextAnnotation_053t7k1">
+      <bpmn:text>передача на согласование в ЕГКН, и получение от ЕГКН результата</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1j7kknq" sourceRef="SubProcess_1eesq2q" targetRef="TextAnnotation_053t7k1" />
+    <bpmn:textAnnotation id="TextAnnotation_1ikjzgb">
+      <bpmn:text>Результат: Одобрение/Отказ</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0py673n" sourceRef="SubProcess_1eesq2q" targetRef="TextAnnotation_1ikjzgb" />
+    <bpmn:textAnnotation id="TextAnnotation_0khn1cv">
+      <bpmn:text>До этого этапа поставить статус Applied (для Ерсултана)</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0w5n6mj" sourceRef="UserTask_0e8a9l9" targetRef="TextAnnotation_0khn1cv" />
+    <bpmn:textAnnotation id="TextAnnotation_02v93xn">
+      <bpmn:text>Формирование окончательного Отрицаельного Акта</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0q57ack" sourceRef="SubProcess_1w82ypc" targetRef="TextAnnotation_02v93xn" />
+    <bpmn:textAnnotation id="TextAnnotation_0nx0ypp">
+      <bpmn:text>При положительном решении - данные передаются в ПКК</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1911l37" sourceRef="UserTask_09cyfwm" targetRef="TextAnnotation_0nx0ypp" />
+    <bpmn:textAnnotation id="TextAnnotation_0ug4vy6">
+      <bpmn:text>EDS_TEMP_FILES
+EgknUniversalReceiveOrder</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_07a29c9" sourceRef="SubProcess_1eesq2q" targetRef="TextAnnotation_0ug4vy6" />
+    <bpmn:textAnnotation id="TextAnnotation_0xu6vgl">
+      <bpmn:text>Услуга (егкн): Предоставление ЗУ через торги</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_041s9h9" sourceRef="StartEvent_0x8hq4l" targetRef="TextAnnotation_0xu6vgl" />
+    <bpmn:textAnnotation id="TextAnnotation_0q7qjmq">
+      <bpmn:text>В случае отрицательного решения - перейти в конец.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0xqquag" sourceRef="ExclusiveGateway_0bbs66q" targetRef="TextAnnotation_0q7qjmq" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="zuTorgi">
+      <bpmndi:BPMNEdge id="Flow_13mxfxj_di" bpmnElement="Flow_13mxfxj">
+        <di:waypoint x="1230" y="362" />
+        <di:waypoint x="1302" y="362" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mbfljp_di" bpmnElement="Flow_1mbfljp">
+        <di:waypoint x="980" y="362" />
+        <di:waypoint x="1035" y="362" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1w5bsxo_di" bpmnElement="Flow_1w5bsxo">
+        <di:waypoint x="640" y="389" />
+        <di:waypoint x="640" y="450" />
+        <di:waypoint x="353" y="450" />
+        <di:waypoint x="353" y="403" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1yn6m83_di" bpmnElement="Flow_1yn6m83">
+        <di:waypoint x="570" y="364" />
+        <di:waypoint x="615" y="364" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0p0673d_di" bpmnElement="SequenceFlow_0p0673d">
+        <di:waypoint x="1060" y="337" />
+        <di:waypoint x="1060" y="270" />
+        <di:waypoint x="1320" y="270" />
+        <di:waypoint x="1320" y="344" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1wz09o4_di" bpmnElement="SequenceFlow_1wz09o4">
+        <di:waypoint x="248" y="363" />
+        <di:waypoint x="303" y="363" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1aafer5_di" bpmnElement="SequenceFlow_1aafer5">
+        <di:waypoint x="830" y="362" />
+        <di:waypoint x="880" y="362" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0a4s61d_di" bpmnElement="SequenceFlow_0a4s61d">
+        <di:waypoint x="665" y="364" />
+        <di:waypoint x="730" y="364" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_15egapd_di" bpmnElement="SequenceFlow_15egapd">
+        <di:waypoint x="1085" y="362" />
+        <di:waypoint x="1130" y="362" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_12rw75j_di" bpmnElement="SequenceFlow_12rw75j">
+        <di:waypoint x="403" y="363" />
+        <di:waypoint x="470" y="363" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_0x8hq4l_di" bpmnElement="StartEvent_0x8hq4l">
+        <dc:Bounds x="212" y="345" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_0e8a9l9_di" bpmnElement="UserTask_0e8a9l9">
+        <dc:Bounds x="303" y="323" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_1mt9641_di" bpmnElement="UserTask_1mt9641">
+        <dc:Bounds x="470" y="323" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_09cyfwm_di" bpmnElement="UserTask_09cyfwm">
+        <dc:Bounds x="1130" y="322" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1w6shxz_di" bpmnElement="EndEvent_1w6shxz">
+        <dc:Bounds x="1302" y="344" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0bbs66q_di" bpmnElement="ExclusiveGateway_0bbs66q" isMarkerVisible="true">
+        <dc:Bounds x="1035" y="337" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_1xace34_di" bpmnElement="SubProcess_1eesq2q">
+        <dc:Bounds x="730" y="322" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_0llmv9t_di" bpmnElement="SubProcess_1w82ypc">
+        <dc:Bounds x="880" y="322" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_05u180a_di" bpmnElement="Gateway_05u180a" isMarkerVisible="true">
+        <dc:Bounds x="615" y="339" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0lh308t_di" bpmnElement="TextAnnotation_0lh308t">
+        <dc:Bounds x="715" y="100" width="100" height="96" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0pt49ws_di" bpmnElement="TextAnnotation_0pt49ws">
+        <dc:Bounds x="330" y="132" width="100" height="113" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1d4y86c_di" bpmnElement="TextAnnotation_1d4y86c">
+        <dc:Bounds x="470" y="124" width="230" height="98" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_069hybi_di" bpmnElement="TextAnnotation_069hybi">
+        <dc:Bounds x="873" y="463" width="137" height="67" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_053t7k1_di" bpmnElement="TextAnnotation_053t7k1">
+        <dc:Bounds x="850" y="82" width="100" height="95" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1ikjzgb_di" bpmnElement="TextAnnotation_1ikjzgb">
+        <dc:Bounds x="700" y="520" width="130" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0khn1cv_di" bpmnElement="TextAnnotation_0khn1cv">
+        <dc:Bounds x="145" y="452" width="170" height="63" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_02v93xn_di" bpmnElement="TextAnnotation_02v93xn">
+        <dc:Bounds x="890" y="221" width="120" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0nx0ypp_di" bpmnElement="TextAnnotation_0nx0ypp">
+        <dc:Bounds x="1093" y="458" width="150" height="78" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0ug4vy6_di" bpmnElement="TextAnnotation_0ug4vy6">
+        <dc:Bounds x="405" y="540" width="175" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0xu6vgl_di" bpmnElement="TextAnnotation_0xu6vgl">
+        <dc:Bounds x="160" y="171" width="140" height="57" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0q7qjmq_di" bpmnElement="TextAnnotation_0q7qjmq">
+        <dc:Bounds x="1070" y="132" width="160" height="82" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_1ocug06_di" bpmnElement="Association_1ocug06">
+        <di:waypoint x="353" y="313" />
+        <di:waypoint x="380" y="258" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0naams8_di" bpmnElement="Association_0naams8">
+        <di:waypoint x="531" y="323" />
+        <di:waypoint x="507" y="222" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0j2vlaa_di" bpmnElement="Association_0j2vlaa">
+        <di:waypoint x="792" y="322" />
+        <di:waypoint x="753" y="196" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1albkn9_di" bpmnElement="Association_1albkn9">
+        <di:waypoint x="913" y="402" />
+        <di:waypoint x="918" y="463" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1j7kknq_di" bpmnElement="Association_1j7kknq">
+        <di:waypoint x="801" y="322" />
+        <di:waypoint x="875" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0py673n_di" bpmnElement="Association_0py673n">
+        <di:waypoint x="777" y="402" />
+        <di:waypoint x="767" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0w5n6mj_di" bpmnElement="Association_0w5n6mj">
+        <di:waypoint x="312" y="403" />
+        <di:waypoint x="263" y="452" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0q57ack_di" bpmnElement="Association_0q57ack">
+        <di:waypoint x="938" y="322" />
+        <di:waypoint x="943" y="291" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1911l37_di" bpmnElement="Association_1911l37">
+        <di:waypoint x="1179" y="402" />
+        <di:waypoint x="1179" y="458" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_07a29c9_di" bpmnElement="Association_07a29c9">
+        <di:waypoint x="734" y="400" />
+        <di:waypoint x="567" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_041s9h9_di" bpmnElement="Association_041s9h9">
+        <di:waypoint x="230" y="345" />
+        <di:waypoint x="230" y="228" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0xqquag_di" bpmnElement="Association_0xqquag">
+        <di:waypoint x="1068" y="345" />
+        <di:waypoint x="1130" y="214" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
